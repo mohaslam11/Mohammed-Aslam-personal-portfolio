@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+/* Hide default cursor on desktop */
+@media (pointer: fine) { * { cursor: none !important; } }
+
+body {
+  background-color: #050505;
+  color: #E0E0E0;
+  overflow-x: hidden;
+}
+
+::selection { background: rgba(255,107,0,0.3); color:#fff; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #FF6B00; }
+
+/* Utilities */
+.glass-dark {
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.orange-glow { box-shadow: 0 0 20px rgba(255,107,0,0.15); }
+.orange-glow-hover:hover { box-shadow: 0 0 30px rgba(255,107,0,0.3); }
+
+/* Marquee (used in LoadingScreen) */
+.marquee-track { animation: marquee 20s linear infinite; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
