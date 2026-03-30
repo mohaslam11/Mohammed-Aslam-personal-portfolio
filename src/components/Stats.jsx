@@ -36,7 +36,7 @@ const Counter = ({ value, label, delay }) => {
 };
 
 const stats = [
-  { value:'03', label:'Years in Mobile Dev' },
+  { value:'1.5', label:'Years in Mobile Dev' },
   { value:'15+', label:'Projects Completed' },
   { value:'03', label:'Internships' },
   { value:'08', label:'Technologies' },
