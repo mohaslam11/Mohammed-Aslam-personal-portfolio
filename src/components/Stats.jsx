@@ -1,75 +1,53 @@
 import { useRef, useEffect, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useInView } from 'framer-motion';
+import { useReveal } from '../hooks/useReveal';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const Counter = ({ value, label, index }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+const Counter = ({ value, label, delay }) => {
+  const [ref, visible] = useReveal();
   const [count, setCount] = useState(0);
-  const numericEnd = parseInt(value, 10);
-  const hasPlus = value.includes('+');
+  const end = parseInt(value, 10);
+  const plus = value.includes('+');
+  const ran = useRef(false);
 
   useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const duration = 1800;
-    const step = duration / numericEnd;
-    const timer = setInterval(() => {
-      start++;
-      setCount(start);
-      if (start >= numericEnd) clearInterval(timer);
+    if (!visible || ran.current) return;
+    ran.current = true;
+    let v = 0;
+    const step = 1800 / end;
+    const id = setInterval(() => {
+      v++; setCount(v);
+      if (v >= end) clearInterval(id);
     }, step);
-    return () => clearInterval(timer);
-  }, [isInView, numericEnd]);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    gsap.fromTo(
-      ref.current,
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1, y: 0, duration: 0.6, delay: index * 0.12, ease: 'power3.out',
-        scrollTrigger: { trigger: ref.current, start: 'top 90%' },
-      }
-    );
-  }, [index]);
+    return () => clearInterval(id);
+  }, [visible, end]);
 
   return (
-    <div
-      ref={ref}
-      className="text-center p-6 md:p-8 border border-gray-800 bg-[#0f0f0f] hover:border-cinema-orange/60 transition-all duration-300 group"
-      style={{ opacity: 0 }}
+    <div ref={ref}
+      className={`reveal scale-in ${visible ? 'visible' : ''} d${delay}`}
+      style={{ textAlign:'center', padding:'2rem 1rem', border:'1px solid #1a1a1a', background:'var(--bg3)', transition:'border-color 0.25s' }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--orange)'}
+      onMouseLeave={e => e.currentTarget.style.borderColor = '#1a1a1a'}
     >
-      <h3 className="text-5xl md:text-6xl font-black text-white mb-2 group-hover:text-cinema-orange transition-colors duration-300 tabular-nums">
-        {count}{hasPlus ? '+' : ''}
-      </h3>
-      <p className="text-gray-500 uppercase tracking-widest text-xs font-bold">{label}</p>
+      <p style={{ fontSize:'clamp(2.5rem,6vw,3.5rem)', fontWeight:900, color:'#fff', marginBottom:'0.25rem', fontVariantNumeric:'tabular-nums' }}>
+        {count}{plus ? '+' : ''}
+      </p>
+      <p className="text-xs uppercase tracking-widest font-bold" style={{ color:'var(--muted)' }}>{label}</p>
     </div>
   );
 };
 
-const Stats = () => {
-  const stats = [
-    { value: '03', label: 'Years in Mobile Dev' },
-    { value: '15+', label: 'Projects Completed' },
-    { value: '03', label: 'Internships' },
-    { value: '08', label: 'Technologies' },
-  ];
+const stats = [
+  { value:'03', label:'Years in Mobile Dev' },
+  { value:'15+', label:'Projects Completed' },
+  { value:'03', label:'Internships' },
+  { value:'08', label:'Technologies' },
+];
 
-  return (
-    <section className="bg-cinema-bg py-12 border-b border-gray-900">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {stats.map((s, i) => (
-            <Counter key={i} value={s.value} label={s.label} index={i} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
+const Stats = () => (
+  <section style={{ background:'var(--bg)', padding:'3rem 0', borderBottom:'1px solid #111' }}>
+    <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+      {stats.map((s,i) => <Counter key={i} {...s} delay={i+1}/>)}
+    </div>
+  </section>
+);
 
 export default Stats;

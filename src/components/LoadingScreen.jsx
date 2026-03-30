@@ -1,107 +1,94 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
+const MARQUEE = ['Mohammed Aslam', 'Software Developer', 'Flutter', 'Android', 'iOS', 'Dubai UAE', 'AI Automation', 'Python'];
 
 const LoadingScreen = ({ onComplete }) => {
-  const [percent, setPercent] = useState(0);
-  const [phase, setPhase] = useState('counting');
+  const [pct, setPct] = useState(0);
+  const [done, setDone] = useState(false);
+  const [exit, setExit] = useState(false);
 
   useEffect(() => {
-    let current = 0;
-    const interval = setInterval(() => {
-      if (current < 80) {
-        current += Math.floor(Math.random() * 6) + 2;
-      } else if (current < 95) {
-        current += 1;
-      } else {
-        current = 100;
-        clearInterval(interval);
-        setTimeout(() => setPhase('ready'), 400);
+    let v = 0;
+    const id = setInterval(() => {
+      v += v < 80 ? Math.random() * 5 + 2 : v < 95 ? 1 : 100;
+      v = Math.min(v, 100);
+      setPct(Math.floor(v));
+      if (v >= 100) {
+        clearInterval(id);
+        setTimeout(() => setDone(true), 400);
       }
-      setPercent(Math.min(current, 100));
-    }, 60);
-    return () => clearInterval(interval);
+    }, 55);
+    return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
-    if (phase === 'ready') {
-      const t = setTimeout(() => {
-        setPhase('exit');
-        setTimeout(onComplete, 900);
-      }, 700);
-      return () => clearTimeout(t);
-    }
-  }, [phase, onComplete]);
+    if (!done) return;
+    const t = setTimeout(() => {
+      setExit(true);
+      setTimeout(onComplete, 700);
+    }, 600);
+    return () => clearTimeout(t);
+  }, [done, onComplete]);
+
+  const marqueeItems = [...MARQUEE, ...MARQUEE];
 
   return (
-    <AnimatePresence>
-      {phase !== 'exit' && (
-        <motion.div
-          key="loader"
-          exit={{ opacity: 0, y: '-100%' }}
-          transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center overflow-hidden"
-        >
-          {/* Marquee top */}
-          <div className="absolute top-0 w-full overflow-hidden py-3 border-b border-gray-900">
-            <div className="marquee-track flex gap-10 whitespace-nowrap text-[10px] font-mono text-gray-700 uppercase tracking-[0.3em]">
-              {[...Array(10)].map((_, i) => (
-                <span key={i}>Mohammed Aslam &nbsp;•&nbsp; Software Developer &nbsp;•&nbsp; Flutter &nbsp;•&nbsp; Dubai UAE &nbsp;•&nbsp;</span>
-              ))}
-            </div>
-          </div>
-
-          {/* Logo */}
-          <div className="absolute top-5 left-8">
-            <span className="text-xl font-black uppercase tracking-widest text-white">
-              ASLAM<span className="text-cinema-orange">.</span>
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: '#050505',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        transition: exit ? 'opacity 0.7s ease, transform 0.7s ease' : 'none',
+        opacity: exit ? 0 : 1,
+        transform: exit ? 'translateY(-4%)' : 'none',
+        pointerEvents: exit ? 'none' : 'auto',
+      }}
+    >
+      {/* Top marquee */}
+      <div className="marquee-wrap absolute top-0 w-full py-3 border-b" style={{ borderColor: '#111' }}>
+        <div className="marquee-inner">
+          {marqueeItems.map((t, i) => (
+            <span key={i} className="text-xs font-mono uppercase tracking-widest" style={{ color: '#333' }}>
+              {t} &nbsp;•&nbsp;
             </span>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* Counter */}
-          <div className="flex flex-col items-center gap-6">
-            <div className="relative">
-              <span className="text-[130px] md:text-[200px] font-black leading-none text-white tabular-nums">
-                {String(percent).padStart(2, '0')}
-              </span>
-              <span className="absolute top-6 right-0 translate-x-full text-cinema-orange text-4xl font-black">%</span>
-            </div>
+      {/* Logo */}
+      <div className="absolute top-5 left-8 text-xl font-black uppercase tracking-widest text-white">
+        ASLAM<span style={{ color: 'var(--orange)' }}>.</span>
+      </div>
 
-            {/* Bar */}
-            <div className="w-64 md:w-80 h-[1px] bg-gray-800 relative overflow-hidden">
-              <div
-                className="absolute inset-y-0 left-0 bg-cinema-orange transition-all duration-75"
-                style={{ width: `${percent}%` }}
-              />
-            </div>
+      {/* Big number */}
+      <div className="relative flex flex-col items-center gap-6">
+        <div className="relative">
+          <span className="loader-num">{String(pct).padStart(2, '0')}</span>
+          <span className="absolute top-4 -right-6 text-3xl font-black" style={{ color: 'var(--orange)' }}>%</span>
+        </div>
 
-            <motion.p
-              className="text-[10px] font-mono text-gray-600 uppercase tracking-[0.25em]"
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              {phase === 'ready' ? 'Welcome — Loading complete' : 'Loading portfolio...'}
-            </motion.p>
-          </div>
+        {/* Bar */}
+        <div className="w-64 md:w-80" style={{ height: '1px', background: '#1a1a1a', position: 'relative' }}>
+          <div className="loader-bar-fill" style={{ width: `${pct}%` }} />
+        </div>
 
-          {/* Marquee bottom */}
-          <div className="absolute bottom-0 w-full overflow-hidden py-3 border-t border-gray-900">
-            <div
-              className="marquee-track flex gap-10 whitespace-nowrap text-[10px] font-mono text-gray-700 uppercase tracking-[0.3em]"
-              style={{ animationDirection: 'reverse' }}
-            >
-              {[...Array(10)].map((_, i) => (
-                <span key={i}>Android &nbsp;•&nbsp; iOS &nbsp;•&nbsp; AI Automation &nbsp;•&nbsp; Python &nbsp;•&nbsp; Firebase &nbsp;•&nbsp;</span>
-              ))}
-            </div>
-          </div>
+        <p className="text-xs font-mono uppercase tracking-widest" style={{ color: '#444', animation: 'pulse 1.5s infinite' }}>
+          {done ? 'Welcome' : 'Loading...'}
+        </p>
+      </div>
 
-          <style>{`
-            .marquee-track { animation: marquee 20s linear infinite; }
-            @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-          `}</style>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      {/* Bottom marquee */}
+      <div className="marquee-wrap absolute bottom-0 w-full py-3 border-t" style={{ borderColor: '#111' }}>
+        <div className="marquee-inner" style={{ animationDirection: 'reverse' }}>
+          {marqueeItems.map((t, i) => (
+            <span key={i} className="text-xs font-mono uppercase tracking-widest" style={{ color: '#333' }}>
+              {t} &nbsp;•&nbsp;
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

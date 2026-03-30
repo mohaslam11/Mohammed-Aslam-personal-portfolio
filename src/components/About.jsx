@@ -1,119 +1,77 @@
 import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useReveal } from '../hooks/useReveal';
 
 const skills = [
-  { name: 'Flutter', level: 90 },
-  { name: 'Android (Kotlin)', level: 85 },
-  { name: 'iOS (Swift)', level: 75 },
-  { name: 'Backend & Firebase', level: 80 },
-  { name: 'Python & AI Tools', level: 78 },
-  { name: 'Browser Automation', level: 72 },
+  { name:'Flutter',          level:90 },
+  { name:'Android (Kotlin)', level:85 },
+  { name:'iOS (Swift)',      level:75 },
+  { name:'Firebase & Backend', level:80 },
+  { name:'Python & AI Tools',level:78 },
+  { name:'Browser Automation',level:72 },
 ];
 
-const About = () => {
-  const sectionRef = useRef(null);
-  const imgRef = useRef(null);
-  const textRef = useRef(null);
-  const barsRef = useRef([]);
-
+const SkillBar = ({ name, level, delay, parentVisible }) => {
+  const barRef = useRef(null);
   useEffect(() => {
-    /* Slide in image */
-    gsap.fromTo(
-      imgRef.current,
-      { opacity: 0, x: -60 },
-      {
-        opacity: 1, x: 0, duration: 0.9, ease: 'power3.out',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' },
-      }
-    );
-
-    /* Slide in text */
-    gsap.fromTo(
-      textRef.current,
-      { opacity: 0, x: 60 },
-      {
-        opacity: 1, x: 0, duration: 0.9, delay: 0.15, ease: 'power3.out',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' },
-      }
-    );
-
-    /* Staggered skill bar fills */
-    barsRef.current.forEach((bar, i) => {
-      if (!bar) return;
-      gsap.fromTo(
-        bar,
-        { width: '0%' },
-        {
-          width: bar.dataset.level + '%',
-          duration: 1.4,
-          delay: i * 0.1,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 65%' },
-        }
-      );
-    });
-  }, []);
+    if (!parentVisible || !barRef.current) return;
+    const t = setTimeout(() => {
+      barRef.current.style.width = level + '%';
+    }, delay * 100 + 200);
+    return () => clearTimeout(t);
+  }, [parentVisible, level, delay]);
 
   return (
-    <section id="about" ref={sectionRef} className="py-24 bg-cinema-bg text-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+    <div style={{ marginBottom:'1.25rem' }}>
+      <div className="flex justify-between mb-1.5">
+        <span className="text-xs font-bold uppercase tracking-wider text-white">{name}</span>
+        <span className="font-mono text-xs" style={{ color:'var(--orange)' }}>{level}%</span>
+      </div>
+      <div style={{ height:3, background:'#1a1a1a', overflow:'hidden' }}>
+        <div ref={barRef} className="skill-fill" style={{ '--level': level + '%' }}/>
+      </div>
+    </div>
+  );
+};
 
-          {/* Image */}
-          <div ref={imgRef} className="relative" style={{ opacity: 0 }}>
-            <div className="relative z-10 aspect-video bg-gray-900 overflow-hidden border border-gray-800 group">
-              <img
-                src="/workspace.png"
-                alt="Developer Workspace"
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 contrast-125"
-              />
-              <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent" />
-            </div>
-            <div className="absolute -top-4 -left-4 w-full h-full border border-cinema-orange/30 z-0" />
-            <div className="absolute -bottom-3 -right-3 w-20 h-20 border-b-2 border-r-2 border-cinema-orange" />
+const About = () => {
+  const [imgRef, imgVis]   = useReveal();
+  const [textRef, textVis] = useReveal();
+
+  return (
+    <section id="about" style={{ padding:'6rem 0', background:'var(--bg)' }}>
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+        {/* Image */}
+        <div ref={imgRef} className={`reveal from-left ${imgVis?'visible':''}`} style={{ position:'relative' }}>
+          <div style={{ position:'relative', zIndex:1, overflow:'hidden', border:'1px solid #1a1a1a', aspectRatio:'16/10' }}>
+            <img src="/workspace.png" alt="Workspace"
+              style={{ width:'100%', height:'100%', objectFit:'cover', filter:'grayscale(1)', transition:'filter 0.7s' }}
+              onMouseEnter={e => e.target.style.filter='grayscale(0)'}
+              onMouseLeave={e => e.target.style.filter='grayscale(1)'}
+            />
           </div>
+          {/* Orange offset border */}
+          <div style={{ position:'absolute', top:-12, left:-12, right:12, bottom:12, border:'1px solid rgba(255,107,0,0.2)', zIndex:0 }}/>
+          <div style={{ position:'absolute', bottom:-10, right:-10, width:48, height:48, borderBottom:'2px solid var(--orange)', borderRight:'2px solid var(--orange)' }}/>
+        </div>
 
-          {/* Content */}
-          <div ref={textRef} style={{ opacity: 0 }}>
-            <h4 className="text-cinema-orange font-mono text-sm uppercase tracking-widest mb-4">
-              // The Journey
-            </h4>
-            <h2 className="text-3xl md:text-4xl font-black mb-6">
-              Building Digital <br />
-              <span className="text-gray-500">Excellence.</span>
-            </h2>
-            <p className="text-gray-400 mb-10 leading-relaxed text-sm">
-              I am a Software Application Developer based in{' '}
-              <span className="text-white font-bold">Dubai, UAE</span>. My journey spans native
-              Android development, cross-platform Flutter apps, and AI-powered automation systems.
-              From internships to production deployments — I bring a full-cycle engineering mindset
-              and a Cyber Security background from{' '}
-              <span className="text-white">IIT Jammu</span>.
-            </p>
+        {/* Text */}
+        <div ref={textRef} className={`reveal from-right ${textVis?'visible':''}`}>
+          <span className="section-label">// The Journey</span>
+          <h2 style={{ fontSize:'clamp(1.8rem,4vw,2.5rem)', fontWeight:900, color:'#fff', marginBottom:'1.5rem', lineHeight:1.2 }}>
+            Building Digital<br/><span style={{ color:'#444' }}>Excellence.</span>
+          </h2>
+          <p className="text-sm leading-relaxed mb-10" style={{ color:'#666' }}>
+            I am a Software Application Developer based in{' '}
+            <strong style={{ color:'#fff' }}>Dubai, UAE</strong>. My journey spans native
+            Android development, cross-platform Flutter apps, and AI-powered automation.
+            I also bring a Cyber Security background from{' '}
+            <strong style={{ color:'#fff' }}>IIT Jammu</strong>.
+          </p>
 
-            {/* Skill bars */}
-            <div className="space-y-5">
-              {skills.map((s, i) => (
-                <div key={s.name}>
-                  <div className="flex justify-between mb-1.5">
-                    <span className="text-white text-xs font-bold uppercase tracking-wider">{s.name}</span>
-                    <span className="text-cinema-orange font-mono text-xs">{s.level}%</span>
-                  </div>
-                  <div className="h-[3px] bg-gray-800 overflow-hidden">
-                    <div
-                      ref={(el) => { barsRef.current[i] = el; }}
-                      data-level={s.level}
-                      className="h-full bg-cinema-orange"
-                      style={{ width: '0%' }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {skills.map((s, i) => (
+            <SkillBar key={s.name} {...s} delay={i} parentVisible={textVis}/>
+          ))}
         </div>
       </div>
     </section>

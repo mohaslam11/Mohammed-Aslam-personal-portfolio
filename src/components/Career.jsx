@@ -1,176 +1,99 @@
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useReveal } from '../hooks/useReveal';
 
 const experiences = [
   {
-    year: '2022',
-    role: 'Android Developer Intern',
-    company: 'Mobile Tech Company',
-    description:
-      'Kickstarted my mobile development journey building native Android features in Kotlin. Integrated RESTful APIs, worked on UI components, and gained hands-on experience with the Android SDK and production workflows.',
-    tags: ['Android', 'Kotlin', 'Java', 'REST API', 'XML Layouts'],
-    color: '#3DDC84',
+    year:'2022',
+    role:'Android Developer Intern',
+    company:'Mobile Tech Company',
+    desc:'Kickstarted my mobile journey building native Android features in Kotlin. Integrated REST APIs, built UI components, and shipped to production.',
+    tags:['Android','Kotlin','Java','REST API'],
+    color:'#3DDC84',
   },
   {
-    year: '2024',
-    role: 'Flutter Developer Intern',
-    company: 'Software Studio',
-    description:
-      'Developed cross-platform Flutter applications for both Android and iOS. Built real-time features with Firebase, implemented clean architecture patterns, and shipped features used by live users.',
-    tags: ['Flutter', 'Dart', 'Firebase', 'BLoC', 'REST API'],
-    color: '#00D4FF',
+    year:'2024',
+    role:'Flutter Developer Intern',
+    company:'Software Studio',
+    desc:'Built cross-platform Flutter apps for Android & iOS. Real-time Firebase features, clean architecture, shipped features used by live users.',
+    tags:['Flutter','Dart','Firebase','BLoC'],
+    color:'#00D4FF',
   },
   {
-    year: '2025',
-    role: 'Flutter Developer Intern',
-    company: 'Product Company',
-    description:
-      'Advanced Flutter role focusing on performance optimisation, state management with Riverpod, and integrating complex payment & mapping SDKs. Mentored junior developers and led sprint planning.',
-    tags: ['Flutter', 'Riverpod', 'Maps SDK', 'Payments', 'CI/CD'],
-    color: '#00D4FF',
+    year:'2025',
+    role:'Flutter Developer Intern',
+    company:'Product Company',
+    desc:'Advanced Flutter role — performance optimisation, Riverpod state management, payment & mapping SDK integrations. Mentored junior devs.',
+    tags:['Flutter','Riverpod','Maps SDK','Payments'],
+    color:'#00D4FF',
   },
   {
-    year: '2025',
-    role: 'Software Developer',
-    company: 'Dubai, UAE — Current',
-    description:
-      'Delivering full-cycle mobile apps (Flutter, iOS, Android) for clients in the UAE. Building AI-powered automation tools, browser bots, and lead intelligence systems. Open to full-time & freelance opportunities.',
-    tags: ['Flutter', 'iOS', 'AI Automation', 'Python', 'Playwright', 'Groq API'],
-    color: '#FF6B00',
-    current: true,
+    year:'2025',
+    role:'Software Developer',
+    company:'Dubai, UAE — Current',
+    desc:'Delivering full-cycle mobile apps for UAE clients. Building AI automation tools, browser bots, and lead intelligence systems. Open to opportunities.',
+    tags:['Flutter','iOS','AI','Python','Playwright'],
+    color:'#FF6B00',
+    current:true,
   },
 ];
 
-const CareerItem = ({ item, index }) => {
-  const itemRef = useRef(null);
-
-  useEffect(() => {
-    const el = itemRef.current;
-    if (!el) return;
-    gsap.fromTo(
-      el,
-      { opacity: 0, x: index % 2 === 0 ? -50 : 50 },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 85%',
-        },
+const Item = ({ item, index, parentVis }) => (
+  <div
+    className={`reveal from-left ${parentVis?'visible':''} d${index+1}`}
+    style={{ display:'flex', gap:'1.5rem', paddingBottom:'2.5rem', position:'relative' }}
+  >
+    {/* Dot + line */}
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', flexShrink:0 }}>
+      {item.current
+        ? <div className="dot-current" style={{ marginTop:4 }}/>
+        : <div style={{ width:12, height:12, borderRadius:'50%', border:`2px solid ${item.color}66`, marginTop:4, flexShrink:0, transition:'border-color 0.2s' }}/>
       }
-    );
-  }, [index]);
+      {index < experiences.length - 1 && (
+        <div style={{ width:1, flex:1, marginTop:6, background:`linear-gradient(to bottom, ${item.color}44, transparent)`, minHeight:40 }}/>
+      )}
+    </div>
 
-  return (
-    <div ref={itemRef} className="relative flex gap-6 md:gap-10 group" style={{ opacity: 0 }}>
-      {/* Dot + line */}
-      <div className="flex flex-col items-center shrink-0">
-        <div
-          className="w-5 h-5 rounded-full border-2 mt-1 transition-all duration-500 group-hover:scale-125"
-          style={
-            item.current
-              ? {
-                  backgroundColor: item.color,
-                  borderColor: item.color,
-                  boxShadow: `0 0 18px ${item.color}99`,
-                }
-              : { backgroundColor: 'transparent', borderColor: '#444' }
-          }
-        />
-        {index < experiences.length - 1 && (
-          <div
-            className="w-[1px] flex-1 mt-2 min-h-[60px]"
-            style={{
-              background: `linear-gradient(to bottom, ${item.color}66, transparent)`,
-            }}
-          />
-        )}
+    {/* Content */}
+    <div style={{ paddingBottom:'0.5rem' }}>
+      <span style={{ fontSize:'0.65rem', fontFamily:'monospace', textTransform:'uppercase', letterSpacing:'0.2em', color:item.color, display:'block', marginBottom:6 }}>
+        {item.year}{item.current && ' — Present'}
+      </span>
+      <div style={{ display:'flex', flexWrap:'wrap', alignItems:'baseline', gap:'0.5rem 0.75rem', marginBottom:'0.5rem' }}>
+        <h3
+          style={{ fontSize:'clamp(1rem,3vw,1.25rem)', fontWeight:900, color:'#fff', margin:0, transition:'color 0.2s', cursor:'default' }}
+          onMouseEnter={e => e.target.style.color = item.color}
+          onMouseLeave={e => e.target.style.color = '#fff'}
+        >{item.role}</h3>
+        <span style={{ fontSize:'0.75rem', fontFamily:'monospace', color:'var(--muted)' }}>@ {item.company}</span>
       </div>
-
-      {/* Content */}
-      <div className="pb-12 flex-1">
-        <span
-          className="text-xs font-mono uppercase tracking-[0.25em] mb-2 block"
-          style={{ color: item.color }}
-        >
-          {item.year} {item.current && '— Present'}
-        </span>
-
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3">
-          <h3
-            className="text-xl md:text-2xl font-black text-white transition-colors duration-200"
-            style={{ color: 'white' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = item.color)}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'white')}
-          >
-            {item.role}
-          </h3>
-          <span className="text-gray-500 text-sm font-mono">@ {item.company}</span>
-        </div>
-
-        <p className="text-gray-400 text-sm leading-relaxed max-w-xl mb-4">{item.description}</p>
-
-        <div className="flex flex-wrap gap-2">
-          {item.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 border transition-all duration-300"
-              style={{
-                color: item.color,
-                borderColor: `${item.color}33`,
-                background: `${item.color}0d`,
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+      <p style={{ fontSize:'0.82rem', lineHeight:1.7, color:'#555', maxWidth:520, marginBottom:'0.75rem' }}>{item.desc}</p>
+      <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+        {item.tags.map(tag => (
+          <span key={tag} style={{
+            fontSize:'0.6rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em',
+            color:item.color, border:`1px solid ${item.color}33`, background:`${item.color}0d`, padding:'0.25rem 0.6rem',
+          }}>{tag}</span>
+        ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 const Career = () => {
-  const headRef = useRef(null);
-
-  useEffect(() => {
-    if (!headRef.current) return;
-    gsap.fromTo(
-      headRef.current,
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: headRef.current, start: 'top 85%' },
-      }
-    );
-  }, []);
+  const [ref, vis] = useReveal();
 
   return (
-    <section id="career" className="py-24 bg-[#080808]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Header */}
-        <div ref={headRef} className="mb-16 border-b border-gray-800 pb-8" style={{ opacity: 0 }}>
-          <h4 className="text-cinema-orange font-mono text-sm uppercase tracking-widest mb-2">
-            // Career Path
-          </h4>
-          <h2 className="text-4xl md:text-5xl font-black text-white">
-            My Career &amp; <br />
-            <span className="text-gray-600">Experience</span>
+    <section id="career" style={{ padding:'6rem 0', background:'var(--bg)' }}>
+      <div className="max-w-7xl mx-auto px-6">
+        <div className={`reveal ${vis?'visible':''} mb-14 pb-8`} ref={ref} style={{ borderBottom:'1px solid #111' }}>
+          <span className="section-label">// Career Path</span>
+          <h2 style={{ fontSize:'clamp(2rem,5vw,3rem)', fontWeight:900, color:'#fff', lineHeight:1.2 }}>
+            My Career &amp;<br/><span style={{ color:'#2a2a2a' }}>Experience</span>
           </h2>
         </div>
 
-        {/* Timeline */}
-        <div className="max-w-2xl">
-          {experiences.map((item, i) => (
-            <CareerItem key={i} item={item} index={i} />
+        <div style={{ maxWidth:600 }}>
+          {experiences.map((item,i) => (
+            <Item key={i} item={item} index={i} parentVis={vis}/>
           ))}
         </div>
       </div>
